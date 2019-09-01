@@ -1,0 +1,4 @@
+tweet must be 5 words or longer (not including links)
+links are parsed out
+Hashtags are parsed out
+
