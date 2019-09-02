@@ -1,33 +1,24 @@
+#include "build.h"
+#include <random>
 
-#include <unordered_map>
-#include <set>
-#include <iostream>
-#include <fstream>
-#include <string.h>
-#include <sstream>
 
-#define MIN_TWEET_LEN 5
 
-std::unordered_map<std::string, std::set<std::string>> assoc_mat;
-void build();
-void print_mat();
+bool filler_twitter_handle(std::string);
+int get_random_num(int n);
 
-int main() 
-{
+generator::generator(std::string fp) : src_file_path(fp) {
 
-    std::cout << "init build process \n";
-
-    build(); 
-
-    std::cout << "finished build process \n";
-
-    print_mat();
-    
 }
 
-void build()
+generator::~generator() { }
+
+
+// one pass u fkers
+void generator::build_assoc_mat()
 {
-    std::ifstream in("../data/parsed_trump_tweets.txt", std::ios_base::in);
+    std::ifstream in(src_file_path, std::ios_base::in);
+
+    int cur_index = 0;
     for(std::string line; std::getline(in, line);)
     {
         if(line.size() > MIN_TWEET_LEN)
@@ -36,55 +27,55 @@ void build()
             std::stringstream ss(line);
             for(std::string tok; std::getline(ss, tok, ' ');)
             {
+                if(str_to_index.find(tok) == str_to_index.end())
+                {
+                    str_to_index.insert(std::pair<std::string,int>(tok, cur_index));
+                    assoc_mat[cur_index] = std::vector<int>(0,cur_index);
+                    cur_index++;
+                } 
                 if(prev.size() > 0)
                 {
-                    if(assoc_mat.find(prev) == assoc_mat.end())
+                    int prev_index = str_to_index[prev];
+                    int cur_index =  str_to_index[tok];
+                    
+                    if(assoc_mat[prev_index].size() < cur_index)
                     {
-                        assoc_mat[prev] = std::set<std::string>();
+                        std::vector<int> tmp = std::vector<int>(0, cur_index + 1);
+                        for (int i = 0; i < assoc_mat[prev_index].size(); ++i)
+                        {
+                            tmp[i] = assoc_mat[prev_index][i];  
+                        }
+                        assoc_mat[prev_index] = tmp;
                     }
-
-                    if(tok.size() > 0) 
-                    {
-                        assoc_mat[prev].insert(tok);
-                    }
+                    assoc_mat[prev_index][cur_index]++;
                 }
-                prev = tok;
             }
         }
     }
 }
 
-void print_mat()
-{
-    std::ofstream out("mat.txt", std::ios_base::out);
-    auto it = assoc_mat.begin();
-    for(; it != assoc_mat.end(); ++it) 
-    {
-        std::set<std::string> temp = it->second;
-        out << it->first << ": [";
-        for(std::string s : temp) 
-        {
-            out << s << " ";
-        }
-        out << "] \n";
-    }
+std::string generator::generate() {
+    //  return string for now for testing
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, assoc_mat.size());
+
+    int start = dist(rng);
+
+    return "";
 }
 
+// only allow Donald Trumps' twitter handle to go through
+bool filter_twitter_handle(std::string handle)
+{
+    if(handle[0] == '@' && handle.compare("@realDonaldTrump") != 0) 
+    {
+        return false;
+    }
+    return true;
+}
 
+int main() {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
