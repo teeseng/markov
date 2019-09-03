@@ -2,7 +2,7 @@
 #include <random>
 
 
-
+bool is_ending_token(std::string);
 bool filler_twitter_handle(std::string);
 int get_random_num(int n);
 
@@ -98,8 +98,13 @@ std::string generator::generate() {
     std::uniform_int_distribution<std::mt19937::result_type> dist(0, assoc_mat.size());
 
     int start = dist(rng);
+    std::string start_token = index_to_str[start];
 
-    std::cout << index_to_str[start] << std::endl;
+    while(is_ending_token(start_token))
+    {
+        int random_num = dist(rng);
+        start_token = index_to_str[random_num];
+    }
 
     return "";
 }
@@ -112,6 +117,11 @@ bool filter_twitter_handle(std::string handle)
         return false;
     }
     return true;
+}
+
+bool is_ending_token(std::string token)
+{
+    return token[token.size() - 1] == '.' || token[token.size() - 1] == '!' || token[token.size()-1] == '?';
 }
 
 int main() {
