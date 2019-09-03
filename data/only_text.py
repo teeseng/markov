@@ -10,7 +10,7 @@ def parse_out_hashtags_links(text_str):
     for t in toks:
         if not re.match(r'#.', t) and not re.match(r'https://.', t) and not re.match(r'http://.', t) and not re.match(r'www\.', t) and not re.match(r'pic\.twitter\.com.', t) and not re.match(r'twitter.com.', t):
             if len(t) > 0:
-                internal_toks = re.split(r'[\.\+\?\+!\+]', t)
+                internal_toks = re.split(r'[\.\+\?\+!\+,\+]', t)
                 for it in internal_toks:
                     text += it + " "
         else:

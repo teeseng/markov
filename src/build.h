@@ -7,15 +7,12 @@
 #include <sstream>
 #include <vector>
 
-
 #define MIN_TWEET_LEN 5
-
-
 
 class generator
 {
     std::unordered_map<std::string,int> str_to_index;
-    std::unordered_map<std::string,int> index_to_str;
+    std::unordered_map<int,std::string> index_to_str;
     std::vector<std::vector<int>> assoc_mat;
     std::string src_file_path;
 

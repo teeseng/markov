@@ -1,7 +1,5 @@
 ## Documentation
 
-## Documentation
-
 
 ---
 ## Data Source
