@@ -1,3 +1,5 @@
+#ifndef BUILD_H
+#define BUILD_H
 
 #include <unordered_map>
 #include <set>
@@ -9,27 +11,30 @@
 
 #define MIN_TWEET_LEN 5
 
+
+struct assoc_node;
+
+
+typedef struct assoc_node 
+{
+    std::string tok;
+    std::vector<std::pair<assoc_node*,int>> next_states;
+    assoc_node(std::string input) : tok(input), next_states(std::vector<std::pair<assoc_node*, int>>()) {}
+} mkv_state;
+
 class generator
 {
-    std::unordered_map<std::string,int> str_to_index;
-    std::unordered_map<int,std::string> index_to_str;
-    std::vector<std::vector<int>> assoc_mat;
+
+
     std::string src_file_path;
+    std::vector<mkv_state*> node_list;
 
     void print_mat()
     {
         std::cout << "printing assoc matrix into mat.txt" << std::endl;
         std::ofstream out("mat.txt", std::ios_base::out);
-        for(int i = 0; i < assoc_mat.size(); ++i) 
-        {
-            out << index_to_str[i] << ": [";
-            for(int j = 0; j < assoc_mat[i].size(); ++j) 
-            {
-                out << index_to_str[j] << " = " << assoc_mat[i][j] << " | ";
-            }
-            out << "]";
-        }
     }
+
     public:
     generator(std::string);
     ~generator();
@@ -38,3 +43,5 @@ class generator
     std::string generate();
 
 };
+
+#endif
