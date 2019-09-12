@@ -1,4 +1,6 @@
 #include "build.h"
+
+#include <chrono>
 #include <random>
 
 
@@ -10,7 +12,13 @@ generator::generator(std::string fp) {
     src_file_path = fp;
 }
 
-generator::~generator() { }
+generator::~generator() { 
+    std::cout << "~generator() " << std::endl;
+    for (mkv_state* node : node_list)
+    {
+        delete node;
+    }
+}
 
 
 // one pass u fkers
@@ -38,12 +46,31 @@ void generator::build_assoc_mat()
                 if(prev.size() > 0)
                 {
                     mkv_state* prev_node = counts[prev];
-                         
+                    bool found = false;
+                    for(int i = 0; i < prev_node->next_states.size(); i++)
+                    {
+                        std::string cur = prev_node->next_states[i].first->tok;
+                        if (tok.compare(cur) == 0)
+                        {
+                            prev_node->next_states[i].second++;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found)
+                    {
+                        prev_node->next_states.push_back(
+                            std::pair<assoc_node*,int>(counts[tok],1)
+                        );  
+                    }
+
                 }
+                prev = tok;
             }
         }
     }
-  
+
+    //print_mat();
 }
 
 std::string generator::generate() {
@@ -70,17 +97,31 @@ bool filter_twitter_handle(std::string handle)
 
 bool is_ending_token(std::string token)
 {
-    return token[token.size() - 1] == '.' || token[token.size() - 1] == '!' || token[token.size()-1] == '?';
+    return token[token.size() - 1] == '.' || 
+                token[token.size() - 1] == '!' || 
+                    token[token.size()-1] == '?';
 }
 
 int main() {
 
     std::cout << "Testing my builder \n";
     generator* gen_inst = new generator("../data/parsed_trump_tweets.txt");
+
+    using namespace std::chrono;
+
+    auto start = high_resolution_clock::now();
+
     gen_inst->build_assoc_mat();
+
+    auto stop = high_resolution_clock::now();
+    auto time = duration_cast<microseconds>(stop-start);
+
+
     
-    std::cout << "Building assoc mat finished \n";
-    std::cout << gen_inst->generate() << std::endl;
+    
+    std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
+//    std::cout << gen_inst->generate() << std::endl;
+    delete gen_inst;
 
     return 0;
 }

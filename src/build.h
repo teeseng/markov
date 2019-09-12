@@ -33,6 +33,16 @@ class generator
     {
         std::cout << "printing assoc matrix into mat.txt" << std::endl;
         std::ofstream out("mat.txt", std::ios_base::out);
+        for (mkv_state* node : node_list)
+        {
+            out << node->tok << " = [ ";
+            for (std::pair<assoc_node*,int> edges : node->next_states)
+            {
+                out << edges.first->tok << " : " << edges.second << "|";
+            }
+            out << "]" << std::endl;
+        }
+        out.clear();
     }
 
     public:
