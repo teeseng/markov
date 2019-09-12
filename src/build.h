@@ -45,6 +45,16 @@ class generator
         out.clear();
     }
 
+    // only allow Donald Trumps' twitter handle to go through
+    bool filter_twitter_handle(std::string handle)
+    {
+        if(handle[0] == '@' && handle.compare("@realDonaldTrump") != 0) 
+        {
+            return false;
+        }
+        return true;
+    }
+
     public:
     generator(std::string);
     ~generator();

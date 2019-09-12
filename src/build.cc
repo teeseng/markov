@@ -5,7 +5,6 @@
 
 
 bool is_ending_token(std::string);
-bool filler_twitter_handle(std::string);
 int get_random_num(int n);
 
 generator::generator(std::string fp) {
@@ -21,12 +20,10 @@ generator::~generator() {
 }
 
 
-// one pass u fkers
 void generator::build_assoc_mat()
 {
     std::unordered_map<std::string, mkv_state*> counts;
 
-    // first pass
     std::ifstream in(src_file_path, std::ios_base::in);
     int cur_index = 0;
     for(std::string line; std::getline(in, line);)
@@ -37,6 +34,11 @@ void generator::build_assoc_mat()
             std::stringstream ss(line);
             for(std::string tok; std::getline(ss, tok, ' ');)
             {
+                if(filter_twitter_handle(tok))
+                {
+                    std::cout << "twitter_handle" << std::endl;
+                    continue;
+                }
                 if(counts.find(tok) == counts.end())
                 { 
                     mkv_state* newborn = new mkv_state(tok);
@@ -70,7 +72,7 @@ void generator::build_assoc_mat()
         }
     }
 
-    //print_mat();
+    print_mat();
 }
 
 std::string generator::generate() {
@@ -85,15 +87,6 @@ std::string generator::generate() {
     return "";
 }
 
-// only allow Donald Trumps' twitter handle to go through
-bool filter_twitter_handle(std::string handle)
-{
-    if(handle[0] == '@' && handle.compare("@realDonaldTrump") != 0) 
-    {
-        return false;
-    }
-    return true;
-}
 
 bool is_ending_token(std::string token)
 {
