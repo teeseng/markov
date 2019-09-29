@@ -12,7 +12,7 @@ def parse_out_hashtags_links(text_str):
             if len(t) > 0:
                 internal_toks = re.split(r'[\.\+\?\+!\+,\+]', t)
                 for it in internal_toks:
-                    text += it + " "
+                    text += it.lower() + " "
         else:
             return ""
     return text

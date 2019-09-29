@@ -8,7 +8,9 @@
 #include <string.h>
 #include <sstream>
 #include <vector>
-
+#include <chrono>
+#include <random>
+#include <climits>
 #define MIN_TWEET_LEN 5
 
 
@@ -48,7 +50,7 @@ class generator
     // only allow Donald Trumps' twitter handle to go through
     bool filter_twitter_handle(std::string handle)
     {
-        if(handle[0] == '@' && handle.compare("@realDonaldTrump") != 0) 
+        if(handle[0] == '@' && handle.compare("@realDonaldTrump") == 0) 
         {
             return false;
         }

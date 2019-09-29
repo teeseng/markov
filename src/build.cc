@@ -1,7 +1,5 @@
 #include "build.h"
 
-#include <chrono>
-#include <random>
 
 
 bool is_ending_token(std::string);
@@ -34,11 +32,6 @@ void generator::build_assoc_mat()
             std::stringstream ss(line);
             for(std::string tok; std::getline(ss, tok, ' ');)
             {
-                if(filter_twitter_handle(tok))
-                {
-                    std::cout << "twitter_handle" << std::endl;
-                    continue;
-                }
                 if(counts.find(tok) == counts.end())
                 { 
                     mkv_state* newborn = new mkv_state(tok);
@@ -59,7 +52,7 @@ void generator::build_assoc_mat()
                             break;
                         }
                     }
-                    if(!found)
+                    if(!found && prev.compare(tok) != 0)
                     {
                         prev_node->next_states.push_back(
                             std::pair<assoc_node*,int>(counts[tok],1)
@@ -75,16 +68,42 @@ void generator::build_assoc_mat()
     print_mat();
 }
 
+
 std::string generator::generate() {
     //  return string for now for testing
     std::random_device rd;
     std::mt19937 rng(rd());
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0, node_list.size());
+    typedef std::uniform_int_distribution<std::mt19937::result_type> rng_19937;
+    rng_19937 dist(0, node_list.size());
 
-    int start = dist(rng);
+    std::set<std::string> visited;
+    int cur = dist(rng);
+    std::string result = "";
+    for (int i = 0; i < 25; ++i) {
+
+        mkv_state* start_node = node_list[cur];
+        auto out_nodes = start_node->next_states;
+        while(out_nodes.size() < 3)
+        {
+            cur = dist(rng);
+            start_node = node_list[cur];
+            out_nodes = start_node->next_states;
+        }
 
 
-    return "";
+
+        int max_freq = INT_MIN;
+        visited.insert(start_node->tok);
+        result += start_node->tok + " ";
+
+        do {
+            rng_19937 change_out(0, out_nodes.size());
+            dist = change_out;
+            cur = dist(rng);
+        } while (node_list[cur]->next_states.size() < 4);
+        
+    }
+    return result;
 }
 
 
@@ -112,8 +131,10 @@ int main() {
 
     
     
+    std::ofstream out_file("generated_tweet.txt", std::ios_base::out);
     std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
-//    std::cout << gen_inst->generate() << std::endl;
+    out_file << gen_inst->generate();
+    out_file << std::endl;
     delete gen_inst;
 
     return 0;
