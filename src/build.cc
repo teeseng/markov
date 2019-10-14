@@ -1,9 +1,10 @@
 #include "build.h"
 
-
-
 bool is_ending_token(std::string);
 int get_random_num(int n);
+std::string clean_string(std::string input);
+bool is_ending_token(char c);
+
 
 generator::generator(std::string fp) {
     src_file_path = fp;
@@ -32,15 +33,28 @@ void generator::build_assoc_mat()
             std::stringstream ss(line);
             for(std::string tok; std::getline(ss, tok, ' ');)
             {
+                bool has_period = false;
+                int len = tok.size() - 1;
+                if(tok[len] == '.' && tok.size() > 1 && tok[len-1] != '.')
+                {
+                    has_period = true;
+                }
+
+                tok = clean_string(tok);
+
                 if(counts.find(tok) == counts.end())
                 { 
                     mkv_state* newborn = new mkv_state(tok);
                     counts.insert(std::pair<std::string, mkv_state*>(tok, newborn));
                     node_list.push_back(newborn); 
                 } 
+
+
                 if(prev.size() > 0)
                 {
                     mkv_state* prev_node = counts[prev];
+                    add_out_link(prev_node,tok);
+                    /*
                     bool found = false;
                     for(int i = 0; i < prev_node->next_states.size(); i++)
                     {
@@ -58,18 +72,38 @@ void generator::build_assoc_mat()
                             std::pair<assoc_node*,int>(counts[tok],1)
                         );  
                     }
-
+                    */
                 }
-                prev = tok;
+                if(has_period)
+                {
+                    mkv_state* node = counts[tok];
+                    add_out_link(node,".");
+                    /*
+                    mkv_state* period_node = new mkv_state(".");
+                    for (int i = 0; i < node->next_states.size(); ++i) 
+                    {
+                        if(node->next_states[i].first->tok == '.')
+                        {
+                        }
+                    }
+                    node->next_states.push_back(std::pair<assoc_node*, int>(period_node,1));
+                    */
+                    prev = "";
+                }
+                else 
+                {
+                    prev = tok;
+                }
             }
         }
     }
 
+    // if DEBUG
     print_mat();
 }
 
 
-std::string generator::generate() {
+std::string generator::generate(int num_sentences) {
     //  return string for now for testing
     std::random_device rd;
     std::mt19937 rng(rd());
@@ -77,10 +111,10 @@ std::string generator::generate() {
     rng_19937 dist(0, node_list.size());
 
     std::set<std::string> visited;
-    int cur = dist(rng);
     std::string result = "";
-    for (int i = 0; i < 25; ++i) {
+    for (int i = 0; i < num_sentences; ++i) {
 
+        int cur = dist(rng);
         mkv_state* start_node = node_list[cur];
         auto out_nodes = start_node->next_states;
         while(out_nodes.size() < 3)
@@ -100,23 +134,31 @@ std::string generator::generate() {
             rng_19937 change_out(0, out_nodes.size());
             dist = change_out;
             cur = dist(rng);
-        } while (node_list[cur]->next_states.size() < 4);
+        } while (node_list[cur]->next_states.size() < 3);
         
     }
     return result;
 }
 
-
-bool is_ending_token(std::string token)
+std::string clean_string(std::string input)
 {
-    return token[token.size() - 1] == '.' || 
-                token[token.size() - 1] == '!' || 
-                    token[token.size()-1] == '?';
+    int len = (int)(input.size() - 1);
+    while(is_ending_token(input[len]))
+    {
+        len--; 
+    }
+    input = input.substr(0, ++len);
+    return input;
+}
+
+bool is_ending_token(char c)
+{
+    return c == '.' || c == '!' || c == ',' || c == '?' || c == ':' || c == '"';
 }
 
 int main() {
 
-    std::cout << "Testing my builder \n";
+    std::cout << "INIT build \n";
     generator* gen_inst = new generator("../data/parsed_trump_tweets.txt");
 
     using namespace std::chrono;
@@ -128,12 +170,9 @@ int main() {
     auto stop = high_resolution_clock::now();
     auto time = duration_cast<microseconds>(stop-start);
 
-
-    
-    
     std::ofstream out_file("generated_tweet.txt", std::ios_base::out);
     std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
-    out_file << gen_inst->generate();
+    out_file << gen_inst->generate(3);
     out_file << std::endl;
     delete gen_inst;
 

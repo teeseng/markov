@@ -24,6 +24,27 @@ typedef struct assoc_node
     assoc_node(std::string input) : tok(input), next_states(std::vector<std::pair<assoc_node*, int>>()) {}
 } mkv_state;
 
+void add_out_link(mkv_state* node, std::string tok)
+{
+    bool found = false;
+    if(node && tok.size() > 0)
+    {
+        for(int i = 0; i < node->next_states.size(); ++i)
+        {
+            if(node->next_states[i].first->tok.compare(tok) == 0)
+            {
+                node->next_states[i].second++;
+                found = true;
+            }
+        }
+    }
+    if(!found)
+    {
+        mkv_state* newborn = new mkv_state(tok);
+        node->next_states.push_back(std::pair<assoc_node*, int>(newborn,1));
+    }
+}
+
 class generator
 {
 
@@ -33,16 +54,19 @@ class generator
 
     void print_mat()
     {
-        std::cout << "printing assoc matrix into mat.txt" << std::endl;
+        std::cout << "~ Printing mat.txt" << std::endl;
         std::ofstream out("mat.txt", std::ios_base::out);
         for (mkv_state* node : node_list)
         {
-            out << node->tok << " = [ ";
-            for (std::pair<assoc_node*,int> edges : node->next_states)
+            if (node) 
             {
-                out << edges.first->tok << " : " << edges.second << "|";
+                out << node->tok << " >>> ";
+                for (std::pair<assoc_node*,int> edges : node->next_states)
+                {
+                    out << edges.first->tok << " (" << edges.second << ") ";
+                }
+                out << std::endl;
             }
-            out << "]" << std::endl;
         }
         out.clear();
     }
@@ -62,7 +86,7 @@ class generator
     ~generator();
     void build_assoc_mat();
     void build_markov_mat();
-    std::string generate();
+    std::string generate(int);
 
 };
 

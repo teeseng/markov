@@ -2,4 +2,5 @@
 *.txt
 *.o
 *.out
-*.*.swp
+*.*.sw*
+markov/src/**/*.*.sw*
