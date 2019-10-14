@@ -47,10 +47,10 @@ void add_out_link(mkv_state* node, std::string tok)
 
 class generator
 {
-
-
     std::string src_file_path;
     std::vector<mkv_state*> node_list;
+    std::set<std::string> starting_words;
+    std::unordered_map<std::string, mkv_state*> counts;
 
     void print_mat()
     {
@@ -69,6 +69,15 @@ class generator
             }
         }
         out.clear();
+
+        std::ofstream out2("starters.txt", std::ios_base::out);
+
+        for (auto it = starting_words.begin(); it != starting_words.end(); ++it)
+        {
+            std::string word = *it;
+            out2 << word << std::endl;
+        }
+        out2.clear();
     }
 
     // only allow Donald Trumps' twitter handle to go through

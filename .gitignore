@@ -4,3 +4,4 @@
 *.out
 *.*.sw*
 markov/src/**/*.*.sw*
+progress.txt
