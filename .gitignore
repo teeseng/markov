@@ -5,3 +5,4 @@
 *.*.sw*
 markov/src/**/*.*.sw*
 progress.txt
+build.h.gch

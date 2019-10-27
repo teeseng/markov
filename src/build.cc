@@ -12,13 +12,11 @@ generator::generator(std::string fp) {
 }
 
 generator::~generator() { 
-    std::cout << "~generator() " << std::endl;
     for (mkv_state* node : node_list)
     {
         delete node;
     }
 }
-
 
 void generator::build_assoc_mat()
 {
@@ -48,7 +46,6 @@ void generator::build_assoc_mat()
                     node_list.push_back(newborn); 
                 } 
 
-
                 if(prev.size() > 0)
                 {
                     mkv_state* prev_node = counts[prev];
@@ -75,17 +72,12 @@ void generator::build_assoc_mat()
             }
         }
     }
-
-    // if DEBUG
-    print_mat();
 }
 
 
-std::string generator::generate(int num_sentences) {
+std::string generator::generate(int num_sentences, int min_sentence_len) {
 
-    int min_sentence_len = 10;
-
-    //  return string for now for testing
+    //int min_sentence_len = 10;
     std::random_device rd;
     std::mt19937 rng(rd());
     typedef std::uniform_int_distribution<std::mt19937::result_type> rng_19937;
@@ -102,8 +94,8 @@ std::string generator::generate(int num_sentences) {
             ++set_iter;
         }
         std::string cur = (*set_iter)->tok;
+        result += capitalize(cur);
 
-        //starter[0] = starter[0] + 48; //  capitalize
         while(cur.compare(".") != 0) {
             mkv_state* node = counts[cur];
             int max_count = -1;
@@ -139,18 +131,27 @@ std::string generator::generate(int num_sentences) {
                     {
                         continue;
                     }
+                    if(p.first->next_states.size() == 0)
+                    {
+                        continue;
+                    }
                     max_count = p.second;
                     next_string = p.first->tok;
                     highest_freq_pair = &p;
                 } 
             }
-            highest_freq_pair->second /= 2;
-            result += " " + capitalize(cur);
+            highest_freq_pair->second = 1;
             cur = next_string;
+            if (cur.compare(".") == 0) 
+            {
+                result += cur + " ";
+            }
+            else 
+            {
+                result += " " + cur;
+            }
             len++;
         }
-        result += ".";
-
     }
     return result;
 }
@@ -180,6 +181,23 @@ std::string capitalize(std::string in)
     return in;
 }
 
+std::string clean_text(std::string input)
+{
+    std::string cleaned_text = input;
+    std::stringstream ss(cleaned_text);
+    std::string temp;
+    while (getline(ss, temp, ' ')) 
+    {
+        if(temp.compare("i") == 0)
+        {
+            temp = "I";
+        }
+        std::cout << temp << " ";
+    }
+    cleaned_text += "\n";
+    return cleaned_text;
+}
+
 int main() {
 
     std::cout << "INIT build \n";
@@ -196,7 +214,10 @@ int main() {
 
     std::ofstream out_file("generated_tweet.txt", std::ios_base::out);
     std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
-    out_file << gen_inst->generate(13);
+    std::string generated_text = gen_inst->generate(11,5);
+    generated_text = clean_text(generated_text);
+
+    out_file << generated_text;
     out_file << std::endl;
     delete gen_inst;
 

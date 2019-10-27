@@ -96,7 +96,7 @@ class generator
     ~generator();
     void build_assoc_mat();
     void build_markov_mat();
-    std::string generate(int);
+    std::string generate(int,int);
 
 };
 
