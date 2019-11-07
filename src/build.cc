@@ -106,6 +106,8 @@ std::string generator::generate(int num_sentences, int min_sentence_len) {
                 std::pair<assoc_node*,int>* p = &node->next_states[i];
                 if(p->second > max_count)
                 {
+                    // remove stupid tokens that weren't cleaned correnctly in 
+                    // the data set
                     if(p->first->tok.compare(".") == 0 && len < min_sentence_len) 
                     {
                         continue; 
@@ -123,7 +125,7 @@ std::string generator::generate(int num_sentences, int min_sentence_len) {
             {
                 if(p.second > max_count)
                 {
-                    if(p.first->tok.compare(".") == 0 && len < min_sentence_len) 
+                    if(p.first->tok.compare(".") == 0 && len >= min_sentence_len) 
                     {
                         continue; 
                     }
@@ -192,7 +194,6 @@ std::string clean_text(std::string input)
         {
             temp = "I";
         }
-        std::cout << temp << " ";
     }
     cleaned_text += "\n";
     return cleaned_text;
@@ -214,7 +215,7 @@ int main() {
 
     std::ofstream out_file("generated_tweet.txt", std::ios_base::out);
     std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
-    std::string generated_text = gen_inst->generate(11,5);
+    std::string generated_text = gen_inst->generate(11,1);
     generated_text = clean_text(generated_text);
 
     out_file << generated_text;

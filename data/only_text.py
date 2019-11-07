@@ -2,9 +2,13 @@ import csv
 import sys
 import re
 
+
+typos = ["Donaldtrump"]
+
+
 def parse_out_hashtags_links(text_str):
     #toks.replace("...", "+")
-    toks = re.split(r'[\s\+\-\+\n\+\"\+!\+]', text_str)
+    toks = re.split(r'[\s\+\-\+\n\+\"\+!\+]|https|http', text_str)
     text = ""
     patterns = [r'#.', r'https://.']
 
