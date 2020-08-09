@@ -3,7 +3,6 @@
 #include <chrono>
 #include <random>
 
-
 bool is_ending_token(std::string);
 bool filler_twitter_handle(std::string);
 int get_random_num(int n);
@@ -107,36 +106,17 @@ int main() {
     std::cout << "Testing my builder \n";
     generator* gen_inst = new generator("../data/parsed_trump_tweets.txt");
 
-    using namespace std::chrono;
-
-    auto start = high_resolution_clock::now();
-
-    gen_inst->build_assoc_mat();
-
-    auto stop = high_resolution_clock::now();
-    auto time = duration_cast<microseconds>(stop-start);
-
-
-    
-    
-    std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
-//    std::cout << gen_inst->generate() << std::endl;
+    {
+        using namespace std::chrono;
+        auto start = high_resolution_clock::now();
+        gen_inst->build_assoc_mat();
+        auto stop = high_resolution_clock::now();
+        auto time = duration_cast<microseconds>(stop-start);
+        std::cout << "Building assoc mat finished, took " << time.count() << " microsecs\n";
+    //    std::cout << gen_inst->generate() << std::endl;
+    }
     delete gen_inst;
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
